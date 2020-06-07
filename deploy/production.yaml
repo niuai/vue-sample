@@ -1,0 +1,66 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  labels:
+    k8s-app: k8s-demo
+  name: k8s-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: k8s-demo
+  template:
+    metadata:
+      labels:
+        k8s-app: k8s-demo
+    spec:
+      volumes:
+      - name: config-volume
+        configMap:
+          name: config-settings
+      containers:
+      - name: k8s-demo
+        image: localhost:5000/vue-sample
+        env:
+        - name: NODE_ENV
+          value: production
+        - name: VUE_APP_TITLE
+          value: My App (production)
+        ports:
+        - containerPort: 80
+        volumeMounts:
+          - name: config-volume
+            mountPath: /usr/share/nginx/html/static/
+
+---
+# ------------------- Service ------------------- #
+
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    k8s-app: k8s-demo
+  name: k8s-demo
+spec:
+  type: NodePort
+  ports:
+    - port: 80
+      targetPort: 80
+  selector:
+    k8s-app: k8s-demo
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-settings
+data:
+  app.config.json: |-
+    {
+      "name": "envapp",
+      "version": "1.0.0",
+      "environment": "Development",
+      "basehref": "envapp",
+      "backgroundColor": "black",
+      "URL": "https://bydefault-production.something"
+    }

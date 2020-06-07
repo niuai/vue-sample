@@ -31,10 +31,24 @@
 </template>
 
 <script>
+
+import axios from 'axios'
+
 export default {
   name: 'HelloWorld',
   props: {
     msg: String
+  },
+
+  created(){
+    console.log(process.env.NODE_ENV)
+    console.log(process.env.VUE_APP_TITLE)
+  },
+
+  mounted () {
+    axios
+      .get("static/app.config.json")
+      .then(response => console.log(response.data.URL))
   }
 }
 </script>
